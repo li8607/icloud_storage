@@ -10,6 +10,16 @@ class MethodChannelICloudStorage extends ICloudStoragePlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('icloud_storage');
 
+  Future<String?> isSignedIn() async {
+    final result = await methodChannel.invokeMethod('isSignedIn');
+    return result;
+  }
+
+  Future<String?> signIn() async {
+    final result = await methodChannel.invokeMethod('signIn');
+    return result;
+  }
+
   @override
   Future<List<ICloudFile>> gather({
     required String containerId,

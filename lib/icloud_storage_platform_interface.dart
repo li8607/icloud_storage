@@ -26,6 +26,14 @@ abstract class ICloudStoragePlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Future<String?> isSignedIn() async {
+    throw UnimplementedError('isSignedIn() has not been implemented.');
+  }
+
+  Future<String?> signIn() async {
+    throw UnimplementedError('signIn() has not been implemented.');
+  }
+
   /// Gather all the files' meta data from iCloud container.
   ///
   /// [containerId] is the iCloud Container Id.

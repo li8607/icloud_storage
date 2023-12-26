@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import CloudKit
 
 public class SwiftIcloudStoragePlugin: NSObject, FlutterPlugin {
   var listStreamHandler: StreamHandler?
@@ -17,6 +18,10 @@ public class SwiftIcloudStoragePlugin: NSObject, FlutterPlugin {
   
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
+    case "isSignedIn":
+      isSignedIn(call, result)
+    case "signIn":
+      signIn(call, result)
     case "gather":
       gather(call, result)
     case "upload":
@@ -33,6 +38,49 @@ public class SwiftIcloudStoragePlugin: NSObject, FlutterPlugin {
       result(FlutterMethodNotImplemented)
     }
   }
+
+  private func isSignedIn(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+      let token = FileManager.default.ubiquityIdentityToken?.description
+      result(token)
+  }
+
+  private func signIn(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+      if FileManager.default.ubiquityIdentityToken != nil {
+          let token = FileManager.default.ubiquityIdentityToken?.description
+            result(token)
+        } else {
+            // Open iCloud login window
+            let container = CKContainer.default()
+            container.accountStatus { (accountStatus, err) in
+                if err != nil {
+                    print("\(String(describing: err))")
+                    result(nil)
+                    return
+                }
+                if accountStatus == .noAccount {
+                    print("User doesn't have an iCloud account")
+                    // User doesn't have an iCloud account
+                    result(nil)
+                } else {
+                    DispatchQueue.main.async {
+                        container.requestApplicationPermission(.userDiscoverability) { (status, error) in
+                            if status == .granted {
+                                // iCloud login window opened successfully
+                                print("iCloud login window opened successfully")
+                                let token = FileManager.default.ubiquityIdentityToken?.description
+                                result(token)
+                            } else {
+                                // Error occurred while trying to open the iCloud login window
+                                print("Error occurred while trying to open the iCloud login window")
+                                result(nil)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+  
   
   private func gather(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
     guard let args = call.arguments as? Dictionary<String, Any>,
@@ -103,6 +151,7 @@ public class SwiftIcloudStoragePlugin: NSObject, FlutterPlugin {
         "isDownloading": fileItem.value(forAttribute: NSMetadataUbiquitousItemIsDownloadingKey),
         "isUploaded": fileItem.value(forAttribute: NSMetadataUbiquitousItemIsUploadedKey),
         "isUploading": fileItem.value(forAttribute: NSMetadataUbiquitousItemIsUploadingKey),
+        "isUbiquitous": fileItem.value(forAttribute: NSMetadataItemIsUbiquitousKey),
       ]
       fileMaps.append(map)
     }

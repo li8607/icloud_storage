@@ -26,6 +26,9 @@ class ICloudFile {
   /// Corresponding to NSMetadataUbiquitousItemHasUnresolvedConflictsKey
   final bool hasUnresolvedConflicts;
 
+  /// true if this item is synced to the cloud, false if it is only a local file.
+  final bool isUbiquitous;
+
   /// Constructor to create the object from the map passed from platform code
   ICloudFile.fromMap(Map<dynamic, dynamic> map)
       : relativePath = map['relativePath'] as String,
@@ -38,7 +41,8 @@ class ICloudFile {
         downloadStatus = _mapToDownloadStatusFromNSKeys(map['downloadStatus']),
         isUploading = map['isUploading'],
         isUploaded = map['isUploaded'],
-        hasUnresolvedConflicts = map['hasUnresolvedConflicts'];
+        hasUnresolvedConflicts = map['hasUnresolvedConflicts'],
+        isUbiquitous = map['isUbiquitous'];
 
   /// Map native download status keys to DownloadStatus enum
   static DownloadStatus _mapToDownloadStatusFromNSKeys(String key) {
